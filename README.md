@@ -38,15 +38,6 @@ Enjoy!
 -   [Mime-Types](https://alx-intranet.hbtn.io/rltoken/j9B0Kc-4HDKLUe88ShbOjQ "Mime-Types")
 -   [Redis](https://alx-intranet.hbtn.io/rltoken/nqwKRszO8Tkj_ZWW1EFwGw "Redis")
 
-## Learning Objectives:
-
-At the end of this project, you are expected to be able to [explain to anyone](https://alx-intranet.hbtn.io/rltoken/88vbnogJmkEoxqu-6wAXEw "explain to anyone"), **without the help of Google**:
-
--   how to create an API with Express
--   how to authenticate a user
--   how to store data in MongoDB
--   how to store temporary data in Redis
--   how to setup and use a background worker
 
 ## Requirements:
 
@@ -61,15 +52,108 @@ At the end of this project, you are expected to be able to [explain to anyone](
 
 ### `package.json`
 
-Click to show/hide file contents
+{
+    "name": "files_manager",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+      "lint": "./node_modules/.bin/eslint",
+      "check-lint": "lint [0-9]*.js",
+      "start-server": "nodemon --exec babel-node --presets @babel/preset-env ./server.js",
+      "start-worker": "nodemon --exec babel-node --presets @babel/preset-env ./worker.js",
+      "dev": "nodemon --exec babel-node --presets @babel/preset-env",
+      "test": "./node_modules/.bin/mocha --require @babel/register --exit" 
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+      "bull": "^3.16.0",
+      "chai-http": "^4.3.0",
+      "express": "^4.17.1",
+      "image-thumbnail": "^1.0.10",
+      "mime-types": "^2.1.27",
+      "mongodb": "^3.5.9",
+      "redis": "^2.8.0",
+      "sha1": "^1.1.1",
+      "uuid": "^8.2.0"
+    },
+    "devDependencies": {
+      "@babel/cli": "^7.8.0",
+      "@babel/core": "^7.8.0",
+      "@babel/node": "^7.8.0",
+      "@babel/preset-env": "^7.8.2",
+      "@babel/register": "^7.8.0",
+      "chai": "^4.2.0",
+      "chai-http": "^4.3.0",
+      "mocha": "^6.2.2",
+      "nodemon": "^2.0.2",
+      "eslint": "^6.4.0",
+      "eslint-config-airbnb-base": "^14.0.0",
+      "eslint-plugin-import": "^2.18.2",
+      "eslint-plugin-jest": "^22.17.0",
+      "request": "^2.88.0",
+      "sinon": "^7.5.0"
+    }
+  }
+
 
 ### `.eslintrc.js`
 
-Click to show/hide file contents
+module.exports = {
+    env: {
+      browser: false,
+      es6: true,
+      jest: true,
+    },
+    extends: [
+      'airbnb-base',
+      'plugin:jest/all',
+    ],
+    globals: {
+      Atomics: 'readonly',
+      SharedArrayBuffer: 'readonly',
+    },
+    parserOptions: {
+      ecmaVersion: 2018,
+      sourceType: 'module',
+    },
+    plugins: ['jest'],
+    rules: {
+      'max-classes-per-file': 'off',
+      'no-underscore-dangle': 'off',
+      'no-console': 'off',
+      'no-shadow': 'off',
+      'no-restricted-syntax': [
+        'error',
+        'LabeledStatement',
+        'WithStatement',
+      ],
+    },
+    overrides:[
+      {
+        files: ['*.js'],
+        excludedFiles: 'babel.config.js',
+      }
+    ]
+};
+
 
 ### `babel.config.js`
 
-Click to show/hide file contents
+module.exports = {
+    presets: [
+      [
+        '@babel/preset-env',
+        {
+          targets: {
+            node: 'current',
+          },
+        },
+      ],
+    ],
+};
+
 
 ### and...
 
@@ -616,3 +700,47 @@ bob@dylan:~$
 ```
 
 -   File: `utils/, controllers/FilesController.js, worker.js`
+
+10. Tests!
+#advanced
+Of course, a strong and stable project can not be good without tests.
+
+Create tests for redisClient and dbClient.
+
+Create tests for each endpoints:
+
+GET /status
+GET /stats
+POST /users
+GET /connect
+GET /disconnect
+GET /users/me
+POST /files
+GET /files/:id
+GET /files (don’t forget the pagination)
+PUT /files/:id/publish
+PUT /files/:id/unpublish
+GET /files/:id/data
+Repo:
+
+GitHub repository: alx-files_manager
+File: tests/
+11. New user - welcome email
+#advanced
+Update the endpoint POST /users endpoint to start a background processing for sending a “Welcome email” to the user:
+
+Create a Bull queue userQueue
+When a new user is stored (in DB), add a job to this queue with the userId
+Update the file worker.js:
+
+By using the module Bull, create a queue userQueue
+Process this queue:
+If userId is not present in the job, raise an error Missing userId
+If no document is found in DB based on the userId, raise an error User not found
+Print in the console Welcome <email>!
+In real life, you can use a third party service like Mailgun to send real email. These API are slow, (sending via SMTP is worst!) and sending emails via a background job is important to optimize API endpoint.
+
+Repo:
+
+GitHub repository: alx-files_manager
+File: utils/, worker.js, controllers/UsersController.js
