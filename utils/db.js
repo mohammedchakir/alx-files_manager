@@ -1,70 +1,72 @@
-import { env } from 'process';
-import { MongoClient, ObjectId } from 'mongodb';
+#!/usr/bin/node
 
-// eslint-disable-next-line import/prefer-default-export
-export class DBClient {
+const { MongoClient } = require('mongodb');
+const mongo = require('mongodb');
+const { pwdHashed } = require('./utils');
+
+class DBClient {
   constructor() {
-    const host = env.DB_PORT ? env.DB_PORT : '127.0.0.1';
-    const port = env.DB_HOST ? env.DB_HOST : 27017;
-    const database = env.DB_DATABASE ? env.DB_DATABASE : 'files_manager';
-    this.myClient = MongoClient(`mongodb://${host}:${port}/${database}`);
-    this.myClient.connect();
+    const host = (process.env.DB_HOST) ? process.env.DB_HOST : 'localhost';
+    const port = (process.env.DB_PORT) ? process.env.DB_PORT : 27017;
+    this.database = (process.env.DB_DATABASE) ? process.env.DB_DATABASE : 'files_manager';
+    const dbUrl = `mongodb://${host}:${port}`;
+    this.connected = false;
+    this.client = new MongoClient(dbUrl, { useUnifiedTopology: true });
+    this.client.connect().then(() => {
+      this.connected = true;
+    }).catch((err) => console.log(err.message));
   }
 
   isAlive() {
-    return this.myClient.isConnected();
+    return this.connected;
   }
 
   async nbUsers() {
-    /* returns number of documents in the collection users */
-    const myDB = this.myClient.db();
-    const myCollection = myDB.collection('users');
-    return myCollection.countDocuments();
+    await this.client.connect();
+    const users = await this.client.db(this.database).collection('users').countDocuments();
+    return users;
   }
 
   async nbFiles() {
-    /* returns number of documents in the collection files */
-    const myDB = this.myClient.db();
-    const myCollection = myDB.collection('files');
-    return myCollection.countDocuments();
+    await this.client.connect();
+    const users = await this.client.db(this.database).collection('files').countDocuments();
+    return users;
   }
 
-  async userExists(email) {
-    /* returns true if the user with the given email exists */
-    const myDB = this.myClient.db();
-    const myCollection = myDB.collection('users');
-    return myCollection.findOne({ email });
+  async createUser(email, password) {
+    const hashedPwd = pwdHashed(password);
+    await this.client.connect();
+    const user = await this.client.db(this.database).collection('users').insertOne({ email, password: hashedPwd });
+    return user;
   }
 
-  async newUser(email, passwordHash) {
-    /* creates a new user with the given email and passwordHash */
-    const myDB = this.myClient.db();
-    const myCollection = myDB.collection('users');
-    return myCollection.insertOne({ email, passwordHash });
-  }
-
-  async filterUser(filters) {
-    const myDB = this.myClient.db();
-    const myCollection = myDB.collection('users');
-    if ('_id' in filters) {
-      // eslint-disable-next-line no-param-reassign
-      filters._id = ObjectId(filters._id);
+  async getUser(email) {
+    await this.client.connect();
+    const user = await this.client.db(this.database).collection('users').find({ email }).toArray();
+    if (!user.length) {
+      return null;
     }
-    return myCollection.findOne(filters);
+    return user[0];
   }
 
-  async filterFiles(filters) {
-    const myDB = this.myClient.db();
-    const myCollection = myDB.collection('files');
-    const idFilters = ['_id', 'userId', 'parentId'].filter((prop) => prop in filters && filters[prop] !== '0');
-    idFilters.forEach((i) => {
-      // eslint-disable-next-line no-param-reassign
-      filters[i] = ObjectId(filters[i]);
-    });
-    return myCollection.findOne(filters);
+  async getUserById(id) {
+    const _id = new mongo.ObjectID(id);
+    await this.client.connect();
+    const user = await this.client.db(this.database).collection('users').find({ _id }).toArray();
+    if (!user.length) {
+      return null;
+    }
+    return user[0];
+  }
+
+  async userExist(email) {
+    const user = await this.getUser(email);
+    if (user) {
+      return true;
+    }
+    return false;
   }
 }
 
 const dbClient = new DBClient();
-
-export default dbClient;
+module.exports = dbClient;
