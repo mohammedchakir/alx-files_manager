@@ -31,7 +31,7 @@ class AuthController {
     }
 
     await redisClient.del(`auth_${token}`);
-    return res.status(204).end(); // end will make ;à send empty body, 204 mean no content
+    return res.status(204).end();
   }
 }
 

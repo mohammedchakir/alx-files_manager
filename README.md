@@ -645,7 +645,7 @@ bob@dylan:~$
 
 
 
-#### [9. Image Thumbnails]()
+#### [9. Image Thumbnails](controllers/FilesController.js)
 
 
 Update the endpoint `POST /files` endpoint to start a background processing for generating thumbnails for a file of type `image`:
@@ -701,8 +701,8 @@ bob@dylan:~$
 
 -   File: `utils/, controllers/FilesController.js, worker.js`
 
-10. Tests!
-#advanced
+#### [10. Tests!](tests)
+
 Of course, a strong and stable project can not be good without tests.
 
 Create tests for redisClient and dbClient.
@@ -721,12 +721,12 @@ GET /files (don’t forget the pagination)
 PUT /files/:id/publish
 PUT /files/:id/unpublish
 GET /files/:id/data
-Repo:
 
-GitHub repository: alx-files_manager
-File: tests/
-11. New user - welcome email
-#advanced
+- File: `tests/`
+
+
+#### [11. New user - welcome email](worker.js)
+
 Update the endpoint POST /users endpoint to start a background processing for sending a “Welcome email” to the user:
 
 Create a Bull queue userQueue
@@ -740,7 +740,5 @@ If no document is found in DB based on the userId, raise an error User not found
 Print in the console Welcome <email>!
 In real life, you can use a third party service like Mailgun to send real email. These API are slow, (sending via SMTP is worst!) and sending emails via a background job is important to optimize API endpoint.
 
-Repo:
 
-GitHub repository: alx-files_manager
-File: utils/, worker.js, controllers/UsersController.js
+- File: `utils/, worker.js, controllers/UsersController.js`

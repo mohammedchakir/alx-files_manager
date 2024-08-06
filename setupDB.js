@@ -1,11 +1,8 @@
 const MongoClient = require('mongodb').MongoClient;
 
-
 const url = 'mongodb://localhost:27017';
 
-
 const dbName = 'files_manager';
-
 
 MongoClient.connect(url, { useUnifiedTopology: true }, function (err, client) {
   if (err) {
@@ -17,10 +14,10 @@ MongoClient.connect(url, { useUnifiedTopology: true }, function (err, client) {
 
   const db = client.db(dbName);
 
-  // Check 'users' collection
+  // Check collection 'users'
   checkAndInsert(db, 'users', 4, { name: 'User' });
 
-  // Check 'files' collection
+  // Check collection 'files'
   checkAndInsert(db, 'files', 30, { name: 'File' });
 });
 

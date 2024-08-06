@@ -30,7 +30,7 @@ userQueue.process(async (job) => {
   try {
     const { userId } = job.data;
     if (!userId) throw new Error('Missing userId');
-    // userId already objectid
+    // userId already objected
     const user = await dbClient.dbClient.collection('users').findOne({ _id: ObjectId(userId) });
     if (!user) throw new Error('User not found');
 
